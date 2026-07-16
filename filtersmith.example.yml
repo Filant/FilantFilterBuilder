@@ -1,0 +1,27 @@
+sources:
+  - name: AdGuard DNS filter
+    url: https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt
+  - name: HaGeZi Pro
+    url: https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt
+  - name: Phishing URL Blocklist
+    url: https://raw.githubusercontent.com/mitchellkrogza/Phishing.Database/master/phishing-domains/output/domains/ACTIVE/list
+
+profiles:
+  lite:
+    sources:
+      - AdGuard DNS filter
+    format: adguard
+    output: dist/filtersmith-lite.txt
+  balanced:
+    sources:
+      - AdGuard DNS filter
+      - HaGeZi Pro
+    format: adguard
+    output: dist/filtersmith-balanced.txt
+  aggressive:
+    sources:
+      - AdGuard DNS filter
+      - HaGeZi Pro
+      - Phishing URL Blocklist
+    format: adguard
+    output: dist/filtersmith-aggressive.txt
