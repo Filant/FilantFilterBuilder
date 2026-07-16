@@ -1,4 +1,4 @@
-name: Build AdGuard Blocklist
+﻿name: Build AdGuard Blocklist
 
 on:
   workflow_dispatch:
@@ -23,21 +23,27 @@ jobs:
 
       - run: mvn -B clean package
 
-      - run: |
+      - name: Build lite and balanced blocklists
+        run: |
+          java -jar target/filtersmith-0.1.0-SNAPSHOT.jar build \
+            --config filtersmith.example.yml \
+            --profile lite
           java -jar target/filtersmith-0.1.0-SNAPSHOT.jar build \
             --config filtersmith.example.yml \
             --profile balanced
 
-      - name: Publish generated blocklist
+      - name: Publish generated blocklists
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           mkdir -p publish
+          cp dist/filtersmith-lite.txt publish/adguard-openwrt-lite.txt
           cp dist/filtersmith-balanced.txt publish/adguard.txt
           git fetch origin generated || true
           git checkout --orphan generated
           git rm -rf . || true
+          cp publish/adguard-openwrt-lite.txt adguard-openwrt-lite.txt
           cp publish/adguard.txt adguard.txt
-          git add adguard.txt
-          git commit -m "chore: update generated blocklist"
+          git add adguard-openwrt-lite.txt adguard.txt
+          git commit -m "chore: update generated blocklists"
           git push --force origin generated
