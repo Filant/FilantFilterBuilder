@@ -2,6 +2,16 @@
 
 on:
   workflow_dispatch:
+    inputs:
+      profile:
+        description: "FilterSmith profile to publish"
+        required: true
+        default: "lite"
+        type: choice
+        options:
+          - lite
+          - balanced
+          - aggressive
   schedule:
     - cron: "20 3 * * *"
 
@@ -11,6 +21,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PROFILE: ${{ github.event.inputs.profile || 'lite' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -23,27 +35,36 @@ jobs:
 
       - run: mvn -B clean package
 
-      - name: Build lite and balanced blocklists
+      - name: Build selected profile
         run: |
           java -jar target/filtersmith-0.1.0-SNAPSHOT.jar build \
             --config filtersmith.example.yml \
-            --profile lite
-          java -jar target/filtersmith-0.1.0-SNAPSHOT.jar build \
-            --config filtersmith.example.yml \
-            --profile balanced
+            --profile "$PROFILE"
+
+          if [ "$PROFILE" != "lite" ]; then
+            java -jar target/filtersmith-0.1.0-SNAPSHOT.jar build \
+              --config filtersmith.example.yml \
+              --profile lite
+          fi
 
       - name: Publish generated blocklists
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           mkdir -p publish
+
+          cp "dist/filtersmith-$PROFILE.txt" publish/adguard-selected.txt
+          cp "dist/filtersmith-$PROFILE.txt" publish/adguard.txt
           cp dist/filtersmith-lite.txt publish/adguard-openwrt-lite.txt
-          cp dist/filtersmith-balanced.txt publish/adguard.txt
+
           git fetch origin generated || true
           git checkout --orphan generated
           git rm -rf . || true
-          cp publish/adguard-openwrt-lite.txt adguard-openwrt-lite.txt
+
+          cp publish/adguard-selected.txt adguard-selected.txt
           cp publish/adguard.txt adguard.txt
-          git add adguard-openwrt-lite.txt adguard.txt
-          git commit -m "chore: update generated blocklists"
+          cp publish/adguard-openwrt-lite.txt adguard-openwrt-lite.txt
+
+          git add adguard-selected.txt adguard.txt adguard-openwrt-lite.txt
+          git commit -m "chore: update generated blocklists ($PROFILE)"
           git push --force origin generated
