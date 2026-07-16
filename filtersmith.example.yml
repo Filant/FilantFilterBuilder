@@ -5,6 +5,10 @@ sources:
     url: https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt
   - name: Phishing URL Blocklist
     url: https://raw.githubusercontent.com/mitchellkrogza/Phishing.Database/master/phishing-domains/output/domains/ACTIVE/list
+  - name: Perflyst and Dandelion Sprout's Smart-TV Blocklist
+    url: https://adguardteam.github.io/HostlistsRegistry/assets/filter_7.txt
+  - name: Malicious URL Blocklist (URLHaus)
+    url: https://adguardteam.github.io/HostlistsRegistry/assets/filter_11.txt
 
 profiles:
   lite:
