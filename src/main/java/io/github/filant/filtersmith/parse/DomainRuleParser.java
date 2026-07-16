@@ -26,10 +26,15 @@ public final class DomainRuleParser implements RuleParser {
     if (domain.isEmpty() || !looksLikeDomain(domain.get())) {
       return Optional.empty();
     }
-    String normalized = normalizeDomain(domain.get());
-    if (normalized.isEmpty()) {
-      return Optional.empty();
-    }
+      String normalized;
+      try {
+          normalized = normalizeDomain(domain.get());
+      } catch (IllegalArgumentException ex) {
+          return Optional.empty();
+      }
+      if (normalized.isEmpty()) {
+          return Optional.empty();
+      }
     return Optional.of(exception ? new ExceptionRule(normalized) : new DomainRule(normalized));
   }
 
